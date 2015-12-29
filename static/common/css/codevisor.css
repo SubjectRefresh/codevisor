@@ -157,6 +157,31 @@ select:focus {
     transform: translateY(0);
 }
 
+span.contributor {
+	display: inline-block;
+	transition: all 0.2s linear;
+    -webkit-transform: scale(1, 1);
+    -ms-transform: scale(1, 1);
+    transform: scale(1, 1);
+	margin-right: 20px;
+}
+
+span.contributor:hover {
+	-webkit-transform: scale(1.1, 1.1);
+    -ms-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1);
+}
+
+span.contributor:last-child {
+	margin-right: 0;
+}
+
+span.contributor img {
+	border-radius: 100px;
+	max-width: 100px;
+	min-width: 50px;
+}
+
 @media only screen and (max-width: 900px) {
     .repo-page {
         position: static;
