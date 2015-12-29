@@ -12,11 +12,6 @@ body {
     padding: 0;
 }
 
-input:focus,
-select:focus {
-    outline-width: 0;
-}
-
 input.valid {
     background-color: green !important;
     color: #fff !important;
@@ -95,6 +90,7 @@ input:focus,
 input:hover,
 select:hover,
 select:focus {
+	outline-width: 0;
 	background-color: #fff;
 }
 
