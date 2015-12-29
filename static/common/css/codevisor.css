@@ -8,6 +8,7 @@
 
 html,
 body {
+	background-color: black;
     margin: 0;
     padding: 0;
 }
@@ -99,6 +100,7 @@ select:focus {
 }
 
 .repo-page {
+    overflow-y: auto;
     color: #fff;
     background-color: #212121;
     -webkit-transform: translateY(-100%);
@@ -106,45 +108,38 @@ select:focus {
     transform: translateY(-100%);
 }
 
+.container {
+    height: 100%;
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
 #video-pane,
 #sidebar,
 #contributors {
-    border: 1px solid white;
+    border: 1px solid #ececec;
     margin-top: 20px;
-    /*margin-left: 20px;*/
     background: red;
-}
-
-#video-pane,
-#sidebar {
-    height: calc(100% - 20px);
+    height: auto;
     display: inline-block;
-}
-
-.repo-page > .row,
-#contributors {
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.repo-page > .row {
-    max-height: calc(80% - 20px);
-    height: 80%;
-}
-
-#video-pane {
-    width: 70%;
-}
-
-#sidebar {
-    width: 20%;
-    float: right;
 }
 
 #contributors {
     text-align: center;
-    min-height: 20%;
+}
+
+#video-pane,
+#contributors {
+    width: 70%;
+}
+
+#sidebar {
+    overflow-y: auto;
+    width: 20%;
+    height: calc(100% - 40px);
+    float: right;
+    margin-bottom: 20px;
 }
 
 .scale-5-5 {
@@ -182,6 +177,21 @@ span.contributor img {
 	min-width: 50px;
 }
 
+.commit {
+	margin-top: 10px;
+}
+
+.commit > span {
+	display: block;
+	width: 100%;
+	text-align: center;
+	margin-right: 10px;
+}
+.author img {
+	max-width: 50px;
+	border-radius: 50px;
+}
+
 @media only screen and (max-width: 900px) {
     .repo-page {
         position: static;
@@ -195,9 +205,6 @@ span.contributor img {
     }
     #sidebar {
         min-height: 200px;
-    }
-    .repo-page > .row {
-        height: auto;
     }
     #contributors {
         margin-top: 20px;

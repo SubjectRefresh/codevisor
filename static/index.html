@@ -1,7 +1,6 @@
 <!--
 	(c) 2015 Finnian Anderson. All rights reserved.
 -->
-
 <!DOCTYPE HTML>
 <html>
 
@@ -22,11 +21,11 @@
         </div>
     </div>
     <div class="repo-page">
-        <div class="row">
+        <div class="container">
             <div id="video-pane">{{video}}</div>
-            <div id="sidebar">{{commit activity}}</div>
+            <div id="sidebar"></div>
+            <div id="contributors"></div>
         </div>
-        <div id="contributors"></div>
     </div>
     <script src="common/js/jquery.js"></script>
     <script src="common/js/socket.io.js"></script>
@@ -81,33 +80,37 @@
             });
 
             socket.on("head list", function(packet) {
-            	if (packet.status) {
-	                $("#url").fadeOut("slow", function() {
-	                    $("<select id='head' data-owner='" + packet.owner + "' data-repo='" + packet.repo + "'></select>").appendTo($(".input-container"));
-	                    for (var i = 0; i < packet.heads.length; i++) {
-	                        $("<option value='" + packet.heads[i].ref + "'>" + packet.heads[i].ref.split("/")[2] + "</option>").appendTo($("#head"));
-	                    }
-	                    $("<button class='submit'>Go!</button>").appendTo($(".input-container")).on("click", function() {
-	                        socket.emit("repo page", {
-	                            head: $("#head").val(),
-	                            owner: $("#head").data("owner"),
-	                            repo: $("#head").data("repo")
-	                        });
-	                    });
-	                });
-	            } else {
-	            	alert("Error: " + packet.message);
-	            }
+                if (packet.status) {
+                    $("#url").fadeOut("slow", function() {
+                        $("<select id='head' data-owner='" + packet.owner + "' data-repo='" + packet.repo + "'></select>").appendTo($(".input-container"));
+                        for (var i = 0; i < packet.heads.length; i++) {
+                            $("<option value='" + packet.heads[i].ref + "'>" + packet.heads[i].ref.split("/")[2] + "</option>").appendTo($("#head"));
+                        }
+                        $("<button class='submit'>Go!</button>").appendTo($(".input-container")).on("click", function() {
+                            socket.emit("repo page", {
+                                head: $("#head").val(),
+                                owner: $("#head").data("owner"),
+                                repo: $("#head").data("repo")
+                            });
+                        });
+                    });
+                } else {
+                    alert("Error: " + packet.message);
+                }
             })
             socket.on("repo page", function(packet) {
-                console.log(packet.url, packet.status);
+                console.log(packet);
                 history.pushState('data', '', packet.url);
                 $(".video").addClass("scale-5-5");
                 $(".home").addClass("scale-5-5");
+                $("body").css("background-color","#212121");
                 setTimeout(function() {
                     $(".repo-page").addClass("slide-down").show();
-                    for (var i = 0; i < packet.contributors.length; i++){
-                    	$("<span class='contributor'><a href='" + packet.contributors[i].url +"'><img src='" + packet.contributors[i].icon + "'></a></span>").appendTo($("#contributors"));
+                    for (var i = 0; i < packet.contributors.length; i++) {
+                        $("<span class='contributor'><a href='" + packet.contributors[i].url + "'><img src='" + packet.contributors[i].icon + "'></a></span>").appendTo($("#contributors"));
+                    }
+                    for (var i = 0; i < packet.commits.length; i++) {
+                        $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
                 }, 50);
             });
