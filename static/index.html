@@ -81,20 +81,23 @@
             });
 
             socket.on("head list", function(packet) {
-                console.log(packet);
-                $("#url").fadeOut("slow", function() {
-                    $("<select id='head' data-owner='" + packet.owner + "' data-repo='" + packet.repo + "'></select>").appendTo($(".input-container"));
-                    for (var i = 0; i < packet.heads.length; i++) {
-                        $("<option value='" + packet.heads[i].ref + "'>" + packet.heads[i].ref.split("/")[2] + "</option>").appendTo($("#head"));
-                    }
-                    $("<button class='submit'>Go!</button>").appendTo($(".input-container")).on("click", function() {
-                        socket.emit("repo page", {
-                            head: $("#head").val(),
-                            owner: $("#head").data("owner"),
-                            repo: $("#head").data("repo")
-                        });
-                    });
-                })
+            	if (packet.status) {
+	                $("#url").fadeOut("slow", function() {
+	                    $("<select id='head' data-owner='" + packet.owner + "' data-repo='" + packet.repo + "'></select>").appendTo($(".input-container"));
+	                    for (var i = 0; i < packet.heads.length; i++) {
+	                        $("<option value='" + packet.heads[i].ref + "'>" + packet.heads[i].ref.split("/")[2] + "</option>").appendTo($("#head"));
+	                    }
+	                    $("<button class='submit'>Go!</button>").appendTo($(".input-container")).on("click", function() {
+	                        socket.emit("repo page", {
+	                            head: $("#head").val(),
+	                            owner: $("#head").data("owner"),
+	                            repo: $("#head").data("repo")
+	                        });
+	                    });
+	                });
+	            } else {
+	            	alert("Error: " + packet.message);
+	            }
             })
             socket.on("repo page", function(packet) {
                 console.log(packet.url, packet.status);
@@ -103,6 +106,9 @@
                 $(".home").addClass("scale-5-5");
                 setTimeout(function() {
                     $(".repo-page").addClass("slide-down").show();
+                    for (var i = 0; i < packet.contributors.length; i++){
+                    	$("<span class='contributor'><a href='" + packet.contributors[i].url +"'><img src='" + packet.contributors[i].icon + "'></a></span>").appendTo($("#contributors"));
+                    }
                 }, 50);
             });
         });

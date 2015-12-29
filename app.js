@@ -53,11 +53,30 @@ io.on("connection", function(socket) {
                         "User-Agent": "CodeVisor"
                     }
                 }, function(error, response, body) {
-                    socket.emit("head list", {
-                        heads: JSON.parse(body),
-                        owner: owner,
-                        repo: repo
-                    });
+                    if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
+                        socket.emit("head list", {
+                            status: true,
+                            heads: JSON.parse(body),
+                            owner: owner,
+                            repo: repo
+                        });
+                    }
+                    if (response.statusCode == 404) {
+                        socket.emit("head list", {
+                            status: false,
+                            message: "Repository not found"
+                        });
+                    } else {
+                        socket.emit("head list", {
+                            status: false,
+                            message: "Unknown error"
+                        });
+                    }
+                });
+            } else {
+                socket.emit("head list", {
+                    status: false,
+                    message: "Unsupported host"
                 });
             }
         }
