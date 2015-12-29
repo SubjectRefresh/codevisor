@@ -61,17 +61,19 @@ io.on("connection", function(socket) {
                             repo: repo
                         });
                     }
-                    if (response.statusCode == 404) {
-                        socket.emit("head list", {
-                            status: false,
-                            message: "Repository not found"
-                        });
-                    } else {
-                        socket.emit("head list", {
-                            status: false,
-                            message: "Unknown error"
-                        });
-                    }
+                    else {
+	                    if (response.statusCode == 404) {
+	                        socket.emit("head list", {
+	                            status: false,
+	                            message: "Repository not found"
+	                        });
+	                    } else {
+	                        socket.emit("head list", {
+	                            status: false,
+	                            message: "Unknown error"
+	                        });
+	                    }
+	                }
                 });
             } else {
                 socket.emit("head list", {
