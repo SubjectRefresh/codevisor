@@ -1,0 +1,113 @@
+<!--
+	(c) 2015 Finnian Anderson. All rights reserved.
+-->
+
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>CodeVisor</title>
+    <link rel="stylesheet" type="text/css" href="common/css/codevisor.css">
+</head>
+
+<body>
+    <div class="video" style="">
+        <video muted autoplay loop>
+            <source src="common/img/make_me_feel_better.mp4" type="video/mp4"> Your browser does not support the video tag.
+        </video>
+    </div>
+    <div class="home" style="">
+        <div class="input-container">
+            <input id="url" type="text" size="10" placeholder="github.com/x/y" title="Repository" autofocus>
+        </div>
+    </div>
+    <div class="repo-page">
+        <div class="row">
+            <div id="video-pane">{{video}}</div>
+            <div id="sidebar">{{commit activity}}</div>
+        </div>
+        <div id="contributors">{{contributors}}</div>
+    </div>
+    <script src="common/js/jquery.js"></script>
+    <script src="common/js/socket.io.js"></script>
+    <script type="text/javascript">
+    var urlRegExp = /^((ht|f)tps?:\/\/|)[a-z0-9-\.]+\.[a-z]{2,4}\/?([^\s<>\#%"\,\{\}\\|\\\^\[\]`]+)?$/;
+    var socket;
+    $(function() {
+        $("#url").keyup(function(e) {
+            if (e.keyCode == 13) {
+                socket.emit("get heads", {
+                    url: $(this).val()
+                });
+            }
+            if (e.keyCode >= 48 && e.keyCode <= 90 && e.keyCode != 32) {
+                if (urlRegExp.test($(this).val())) {
+                    $(this).addClass("valid").removeClass("invalid");
+                } else {
+                    $(this).addClass("invalid").removeClass("valid");
+                }
+            }
+        }).blur(function() {
+            if ($(this).val().replace(" ", "") == "") {
+                $(this).removeClass("valid").removeClass("invalid");
+            }
+        });
+        $.getJSON("get_config", function(config) {
+            socket = io(config.socket);
+
+            if (config.google_analytics) {
+                (function(i, s, o, g, r, a, m) {
+                    i['GoogleAnalyticsObject'] = r;
+                    i[r] = i[r] || function() {
+                        (i[r].q = i[r].q || []).push(arguments)
+                    }, i[r].l = 1 * new Date();
+                    a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0];
+                    a.async = 1;
+                    a.src = g;
+                    m.parentNode.insertBefore(a, m)
+                })(window, document, 'script', 'http://www.google-analytics.com/analytics.js', 'ga');
+
+                ga('create', 'UA-69122586-1', 'auto');
+                ga('send', 'pageview');
+                ga('_setDomainName', 'subjectrefresh.info');
+            }
+
+            socket.on("e", function(packet) {
+                if (packet.message == "Invalid URL") {
+                    console.log("Invalid URL");
+                    $("#url").removeClass("valid").addClass("invalid");
+                }
+            });
+
+            socket.on("head list", function(packet) {
+                console.log(packet);
+                $("#url").fadeOut("slow", function() {
+                    $("<select id='head' data-owner='" + packet.owner + "' data-repo='" + packet.repo + "'></select>").appendTo($(".input-container"));
+                    for (var i = 0; i < packet.heads.length; i++) {
+                        $("<option value='" + packet.heads[i].ref + "'>" + packet.heads[i].ref.split("/")[2] + "</option>").appendTo($("#head"));
+                    }
+                    $("<button class='submit'>Go!</button>").appendTo($(".input-container")).on("click", function() {
+                        socket.emit("repo page", {
+                            head: $("#head").val(),
+                            owner: $("#head").data("owner"),
+                            repo: $("#head").data("repo")
+                        });
+                    });
+                })
+            })
+            socket.on("repo page", function(packet) {
+                console.log(packet.url, packet.status);
+                history.pushState('data', '', packet.url);
+                $(".video").addClass("scale-5-5");
+                $(".home").addClass("scale-5-5");
+                setTimeout(function() {
+                    $(".repo-page").addClass("slide-down").show();
+                }, 50);
+            });
+        });
+    })
+    </script>
+</body>
+
+</html>

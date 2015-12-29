@@ -1,0 +1,26 @@
+{
+  "name": "codevisor",
+  "version": "1.0.0",
+  "description": "A live visualiser for your code activity",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.13.3",
+    "request": "^2.67.0",
+    "sha1": "^1.1.1",
+    "socket.io": "^1.3.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SubjectRefresh/CodeVisor.git"
+  },
+  "author": "Finnian Anderson <finnian.anderson@gmail.com> (http://fxapi.co.uk)",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/SubjectRefresh/CodeVisor/issues"
+  },
+  "homepage": "https://github.com/SubjectRefresh/CodeVisor#readme"
+}
