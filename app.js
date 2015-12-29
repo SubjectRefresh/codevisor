@@ -64,27 +64,36 @@ io.on("connection", function(socket) {
     });
 
     socket.on("repo page", function(packet) {
-        console.log("https://api.github.com/repos/" + packet.owner + "/" + packet.repo + "/commits");
         request({
             url: "https://api.github.com/repos/" + packet.owner + "/" + packet.repo + "/commits",
             headers: {
                 'User-Agent': 'CodeVisor'
             }
         }, function(error, response, body) {
-            var log = [];
             if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
                 var commits = JSON.parse(body);
+                var contributors = [];
                 for (var i = 0; i < commits.length; i++) {
-                    log.push({
-                        date: commits[i].commit.author.date,
-                        user: commits[i].commit.author.name,
-                        sha: commits[i].sha,
-                        
-                    });
+                    var duplicate = false;
+                    for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
+                        if (contributors[i2].id == commits[i].author.id) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                    if (!duplicate) { // we didn't find a duplicate contributor
+                        contributors.push({
+                            id: commits[i].author.id,
+                            name: commits[i].commit.author.name,
+                            icon: commits[i].author.avatar_url,
+                            url: commits[i].author.html_url
+                        });
+                    }
                 }
                 socket.emit("repo page", {
                     status: true,
-                    url: "p/" + packet.owner + "/" + packet.repo
+                    url: "p/" + packet.owner + "/" + packet.repo,
+                    contributors: contributors
                 });
             } else {
                 console.log(error);
