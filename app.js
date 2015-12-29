@@ -92,6 +92,7 @@ io.on("connection", function(socket) {
             if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
                 var commits = JSON.parse(body);
                 var contributors = [];
+                var commits2 = [];
                 for (var i = 0; i < commits.length; i++) {
                     var duplicate = false;
                     for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
@@ -108,11 +109,15 @@ io.on("connection", function(socket) {
                             url: commits[i].author.html_url
                         });
                     }
+                    delete commits[i].commit.committer;
+                    commits[i].commit.author.icon = commits[i].author.avatar_url;
+                    commits2.push(commits[i].commit);
                 }
                 socket.emit("repo page", {
                     status: true,
                     url: "p/" + packet.owner + "/" + packet.repo,
-                    contributors: contributors
+                    contributors: contributors,
+                    commits: commits2
                 });
             } else {
                 console.log(error);
