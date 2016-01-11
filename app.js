@@ -85,12 +85,24 @@ io.on("connection", function(socket) {
     });
 
     socket.on("repo page", function(packet) {
+        console.log(packet);
         request({
             url: "https://api.github.com/repos/" + packet.owner + "/" + packet.repo + "/commits",
             headers: {
                 'User-Agent': 'CodeVisor'
             }
         }, function(error, response, body) {
+            request({
+            url: "https://api.github.com/repos/" + packet.owner + "/" + packet.repo + "/git/trees/master?recursive=1",
+            headers: {
+                'User-Agent': 'CodeVisor'
+            }
+        }, function(error2, response2, body2) {
+            body2 = JSON.parse(body2);
+            console.log(body2);
+            for (var i = 0; i < body2.length; i++){
+                if ()
+            }
             if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
                 var commits = JSON.parse(body);
                 var contributors = [];
@@ -125,6 +137,7 @@ io.on("connection", function(socket) {
                 console.log(error);
                 console.log(response.statusCode);
             }
+        });
         });
     });
 
