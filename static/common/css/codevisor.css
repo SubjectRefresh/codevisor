@@ -192,6 +192,10 @@ span.contributor img {
 	border-radius: 50px;
 }
 
+line.link {
+    stroke: #ececec;
+}
+
 @media only screen and (max-width: 900px) {
     .repo-page {
         position: static;
