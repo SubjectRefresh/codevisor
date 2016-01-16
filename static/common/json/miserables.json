@@ -1,19 +1,91 @@
 {
-  "nodes":[
-    {"name":"/","group":0},
-    {"name":"static/","group":1},
-    {"name":"LICENSE","group":1},
-    {"name":"config.js","group":1},
-    {"name":"package.json","group":1},
-    {"name":"node_modules/","group":1},
-    {"name":"README.md","group":1}
-  ],
-  "links":[
-    {"source":0,"target":1,"value":1},
-    {"source":0,"target":2,"value":1},
-    {"source":0,"target":3,"value":1},
-    {"source":0,"target":4,"value":1},
-    {"source":0,"target":5,"value":1},
-    {"source":0,"target":6,"value":1}
-  ]
+    "nodes": [{
+        "name": "/",
+        "group": 0
+    }, {
+        "name": "static",
+        "group": 1
+    }, {
+        "name": "common",
+        "group": 1
+    }, {
+        "name": "css",
+        "group": 2
+    }, {
+        "name": "img",
+        "group": 2
+    }, {
+        "name": "js",
+        "group": 2
+    }, {
+        "name": "json",
+        "group": 2
+    }, {
+        "name": "milesPlayground",
+        "group": 1
+    }, {
+        "name": "css",
+        "group": 2
+    }, {
+        "name": "font",
+        "group": 2
+    }, {
+        "name": "material-design-icons",
+        "group": 4
+    }, {
+        "name": "roboto",
+        "group": 4
+    }, {
+        "name": "js",
+        "group": 3
+    }],
+    "links": [{
+        "source": 0,
+        "target": 1,
+        "value": 16
+    }, {
+        "source": 1,
+        "target": 2,
+        "value": 16
+    }, {
+        "source": 2,
+        "target": 3,
+        "value": 16
+    }, {
+        "source": 3,
+        "target": 4,
+        "value": 16
+    }, {
+        "source": 4,
+        "target": 5,
+        "value": 16
+    }, {
+        "source": 5,
+        "target": 6,
+        "value": 16
+    }, {
+        "source": 6,
+        "target": 7,
+        "value": 16
+    }, {
+        "source": 7,
+        "target": 8,
+        "value": 16
+    }, {
+        "source": 8,
+        "target": 9,
+        "value": 16
+    }, {
+        "source": 9,
+        "target": 10,
+        "value": 16
+    }, {
+        "source": 10,
+        "target": 11,
+        "value": 16
+    }, {
+        "source": 11,
+        "target": 12,
+        "value": 16
+    }]
 }

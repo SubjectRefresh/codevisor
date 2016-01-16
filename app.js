@@ -3,6 +3,7 @@
 */
 
 var config = require("./config.js");
+var git_json = require("./static/common/json/github.json");
 var io, socket_end_point;
 
 var express = require("express");
@@ -85,7 +86,7 @@ io.on("connection", function(socket) {
 
     socket.on("repo page", function(packet) {
         console.log(packet);
-        request({
+        /*request({
             url: "https://api.github.com/repos/" + packet.owner + "/" + packet.repo + "/commits",
             headers: {
                 'User-Agent': 'CodeVisor'
@@ -98,93 +99,98 @@ io.on("connection", function(socket) {
                 }
             }, function(error2, response2, body2) {
                 body2 = JSON.parse(body2);
+                */
+        body2 = git_json;
 
+        var directory = {
+            name: "/",
+            children: []
+        };
 
-                var directory = {
-                    name: "/",
-                    children: []
+        var d3_data = {
+            name: "/",
+            children: []
+        };
+
+        function hasChild(name, root) {
+            var indexOfChild = -1;
+            for (var i = 0; i < root.children.length; i++) {
+                if (root.children[i].name === name) {
+                    indexOfChild = i;
+                    break;
+                }
+            }
+            return (indexOfChild);
+        }
+
+        var root = body2.tree;
+
+        for (var i = 0; i < root.length; i++) { // loop through every file
+            var bookmark = directory;
+            var path = root[i].path.split("/");
+            console.log(path);
+            var name = path[path.length - 1];
+            for (var part = 0; part < path.length; part++) { // loop through every part of the path
+                console.log("--- Checking " + path[part]);
+                var newChild = { // this is who we're gonna give birth to
+                    name: name
                 };
-
-                function hasChild(name, root) {
-                    var indexOfChild = -1;
-                    for (var i = 0; i < root.children.length; i++) {
-                        if (root.children[i].name === name) {
-                            indexOfChild = i;
-                            break;
-                        }
+                if (root[i].type == "tree") { // the file is a directory
+                    newChild.children = []; // our baby currently hasn't got any children
+                    var indexOfChild = hasChild(path[part], bookmark); // does this child already exist?
+                    if (indexOfChild != -1) { // it does
+                        bookmark = bookmark.children[indexOfChild]; // set the bookmark to the correct child
+                    } else { // we need to give birth to it
+                        var newChildIndex = bookmark.children.push({name: path[part], children: []}); // give birth to it!
+                        bookmark = bookmark.children[newChildIndex - 1]; // set the bookmark to be the new child
                     }
-                    return (indexOfChild);
+                } else { // it's a file
+                    console.log("\tAdding " + name + " to " + bookmark.name);
+                    newChild.size = root[i].size; // add the size attribute
+                    bookmark.children.push(newChild); // give birth to it!
+                    // note: we don't know set the bookmark because we want the next child to be a younger sibling
                 }
+            }
+        }
+        console.log(require('util').inspect(directory, true, 10));
 
-                var root = body2.tree;
-
-                for (var i = 0; i < root.length; i++) { // loop through every file
-                    var bookmark = directory;
-                    var path = root[i].path.split("/");
-                    console.log(path);
-                    var name = path[path.length - 1];
-                    for (var part = 0; part < path.length; part++) { // loop through every part of the path
-                        console.log("--- Checking " + path[part]);
-                        var newChild = { // this is who we're gonna give birth to
-                            name: name
-                        };
-                        if (root[i].type == "tree") { // the file is a directory
-                            newChild.children = []; // our baby currently hasn't got any children
-                            var indexOfChild = hasChild(path[part], bookmark); // does this child already exist?
-                            if (indexOfChild != -1) { // it does
-                                bookmark = bookmark.children[indexOfChild]; // set the bookmark to the correct child
-                            } else { // we need to give birth to it
-                                var newChildIndex = bookmark.children.push({
-                                    name: path[part],
-                                    children: []
-                                }); // give birth to it!
-                                bookmark = bookmark.children[newChildIndex - 1]; // set the bookmark to be the new child
-                            }
-                        } else { // it's a file
-                            console.log("\tAdding " + name + " to " + bookmark.name);
-                            newChild.size = root[i].size; // add the size attribute
-                            bookmark.children.push(newChild); // give birth to it!
-                            // note: we don't know set the bookmark because we want the next child to be a younger sibling
-                        }
+        //console.log(JSON.stringify(d3_data));
+        //        if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
+        /*var commits = JSON.parse(body);
+            var contributors = [];
+            var commits2 = [];
+            for (var i = 0; i < commits.length; i++) {
+                var duplicate = false;
+                for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
+                    if (contributors[i2].id == commits[i].author.id) {
+                        duplicate = true;
+                        break;
                     }
                 }
-
-                if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
-                    var commits = JSON.parse(body);
-                    var contributors = [];
-                    var commits2 = [];
-                    for (var i = 0; i < commits.length; i++) {
-                        var duplicate = false;
-                        for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
-                            if (contributors[i2].id == commits[i].author.id) {
-                                duplicate = true;
-                                break;
-                            }
-                        }
-                        if (!duplicate) { // we didn't find a duplicate contributor
-                            contributors.push({
-                                id: commits[i].author.id,
-                                name: commits[i].commit.author.name,
-                                icon: commits[i].author.avatar_url,
-                                url: commits[i].author.html_url
-                            });
-                        }
-                        delete commits[i].commit.committer;
-                        commits[i].commit.author.icon = commits[i].author.avatar_url;
-                        commits2.push(commits[i].commit);
-                    }
-                    socket.emit("repo page", {
-                        status: true,
-                        url: "p/" + packet.owner + "/" + packet.repo,
-                        contributors: contributors,
-                        commits: commits2
+                if (!duplicate) { // we didn't find a duplicate contributor
+                    contributors.push({
+                        id: commits[i].author.id,
+                        name: commits[i].commit.author.name,
+                        icon: commits[i].author.avatar_url,
+                        url: commits[i].author.html_url
                     });
-                } else {
-                    console.log(error);
-                    console.log(response.statusCode);
                 }
+                delete commits[i].commit.committer;
+                commits[i].commit.author.icon = commits[i].author.avatar_url;
+                commits2.push(commits[i].commit);
+            }
+            socket.emit("repo page", {
+                status: true,
+                url: "p/" + packet.owner + "/" + packet.repo,
+                contributors: contributors,
+                commits: commits2
             });
-        });
+        } else {
+            console.log(error);
+            console.log(response.statusCode);
+        }
+            });
+        });*/
     });
 
 });
