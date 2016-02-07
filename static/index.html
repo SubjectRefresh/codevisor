@@ -57,11 +57,11 @@
         $.getJSON("/get_config", function(config) {
             socket = io(config.socket);
 
-            socket.emit("repo page", { // for development
-                head: "master",
-                owner: "subjectrefresh",
-                repo: "codevisor"
-            });
+            // socket.emit("repo page", { // for development
+            //     head: "master",
+            //     owner: "subjectrefresh",
+            //     repo: "codevisor"
+            // });
 
             if (config.google_analytics) {
                 (function(i, s, o, g, r, a, m) {
