@@ -57,6 +57,12 @@
         $.getJSON("get_config", function(config) {
             socket = io(config.socket);
 
+            socket.emit("repo page", { // for development
+                head: "master",
+                owner: "subjectrefresh",
+                repo: "codevisor"
+            });
+
             if (config.google_analytics) {
                 (function(i, s, o, g, r, a, m) {
                     i['GoogleAnalyticsObject'] = r;
@@ -115,8 +121,13 @@
                     for (var i = 0; i < packet.commits.length; i++) {
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
-                    console.log(packet.repo);
-                    var nodes = flatten(packet.repo)
+                    for (selector in packet.styles) {
+                        console.log($(selector));
+                        $(selector).css(packet.styles[selector]);
+                        console.log(selector, packet.styles[selector]);
+                    }
+                    console.log(packet);
+                    var nodes = flatten(packet.tree)
                     var links = d3.layout.tree().links(nodes);
 
                     force
@@ -138,7 +149,6 @@
                         .attr("class", "node")
                         .attr("r", 5)
                         .style("fill", function(d) {
-                            console.log(d);
                             return color(d.color);
                         })
                         .call(force.drag);
