@@ -5,12 +5,14 @@
 var config = require("./config.js");
 var io, socket_end_point;
 var GitHubColors = require("github-colors");
+var fs = require("fs");
 
 var express = require("express");
 var app = express();
 var http = require("http").Server(app);
 var sha1 = require("sha1");
 var request = require("request");
+var cheerio = require('cheerio');
 
 if (config.production) {
     io = require("socket.io")(http, {
@@ -31,13 +33,13 @@ var ObjectId = require('mongoose').Types.ObjectId;
 // Schema
 
 var pageSchema = mongoose.Schema({
-    owner: String, // owner of repository √
-    repo: String, // repository √
-    head: String, // branch √
+    owner: String, // owner of repository
+    repo: String, // repository
+    head: String, // branch
     styles: Object, // page styles
     tree: Object, // cache of tree 
-    commits: Object, // cache of commits √
-    contributors: Object // cache of contributors √
+    commits: Object, // cache of commits
+    contributors: Object // cache of contributors
 });
 
 var Page = mongoose.model("page", pageSchema);
@@ -58,8 +60,31 @@ app.get("/get_config", function(req, res) {
 });
 
 app.get("/p/*", function(req, res) {
+    // what follows is probably really really bad code and uses practises frowned upon by the Node Gods
     console.log("Repo page requested for " + req.params[0]);
-    res.redirect("/");
+    var splitParam = req.params[0].split("/")
+    var owner = splitParam[0];
+    var repo = splitParam[1];
+    Page.findOne({
+        "owner": owner,
+        "repo": repo
+    }, function(err, doc) {
+        if (err) console.log(err);
+        if (doc) {
+            fs.readFile(__dirname + '/static/index.html', 'utf8', function(err, html) {
+                // prevent the url rewriting that we use in the front end
+                $ = cheerio.load(html);
+                $("body").find("script").each(function(){
+                    if ($(this).data("name") == "main") {
+                        $(this).text("var doNotChangeURL=true;" + $(this).text());
+                    }
+                });
+                res.send($.html());
+            });
+        } else {
+            res.status(404).send('Sorry, that page could not be found!');
+        }
+    });
 });
 
 io.on("connection", function(socket) {

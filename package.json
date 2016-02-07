@@ -4,6 +4,7 @@
   "description": "A live visualiser for your code activity",
   "main": "app.js",
   "dependencies": {
+    "cheerio": "^0.20.0",
     "express": "^4.13.3",
     "github-colors": "^2.2.1",
     "mongoose": "^4.4.2",

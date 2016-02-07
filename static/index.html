@@ -6,13 +6,13 @@
 
 <head>
     <title>CodeVisor</title>
-    <link rel="stylesheet" type="text/css" href="common/css/codevisor.css">
+    <link rel="stylesheet" type="text/css" href="/common/css/codevisor.css">
 </head>
 
 <body>
     <div class="video" style="">
         <video muted autoplay loop>
-            <source src="common/img/example.mp4" type="video/mp4"> Your browser does not support the video tag.
+            <source src="/common/img/example.mp4" type="video/mp4"> Your browser does not support the video tag.
         </video>
     </div>
     <div class="home" style="">
@@ -29,10 +29,10 @@
             <div id="contributors"></div>
         </div>
     </div>
-    <script src="common/js/jquery.js"></script>
-    <script src="common/js/socket.io.js"></script>
+    <script src="/common/js/jquery.js"></script>
+    <script src="/common/js/socket.io.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" data-name="main">
     var urlRegExp = /^((ht|f)tps?:\/\/|)[a-z0-9-\.]+\.[a-z]{2,4}\/?([^\s<>\#%"\,\{\}\\|\\\^\[\]`]+)?$/;
     var socket;
     $(function() {
@@ -54,7 +54,7 @@
                 $(this).removeClass("valid").removeClass("invalid");
             }
         });
-        $.getJSON("get_config", function(config) {
+        $.getJSON("/get_config", function(config) {
             socket = io(config.socket);
 
             socket.emit("repo page", { // for development
@@ -109,7 +109,7 @@
             });
             socket.on("repo page", function(packet) {
                 console.log(packet);
-                history.pushState('data', '', packet.url);
+                if (typeof doNotChangeURL === 'undefined') history.pushState('data', '', packet.url);
                 $(".video").addClass("scale-5-5");
                 $(".home").addClass("scale-5-5");
                 $("body").css("background-color", "#212121");
@@ -122,11 +122,9 @@
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
                     for (selector in packet.styles) {
-                        console.log($(selector));
-                        $(selector).css(packet.styles[selector]);
-                        console.log(selector, packet.styles[selector]);
+                        decodedSelector = selector.replace("[dot]",".");
+                        $(decodedSelector).css(packet.styles[selector]);
                     }
-                    console.log(packet);
                     var nodes = flatten(packet.tree)
                     var links = d3.layout.tree().links(nodes);
 
