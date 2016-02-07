@@ -74,9 +74,9 @@ app.get("/p/*", function(req, res) {
             fs.readFile(__dirname + '/static/index.html', 'utf8', function(err, html) {
                 // prevent the url rewriting that we use in the front end
                 $ = cheerio.load(html);
-                $("body").find("script").each(function() {
+                $("body").find("script").each(function(){
                     if ($(this).data("name") == "main") {
-                        $(this).text("var doNotChangeURL=true;" + $(this).text() + "$(function(){socket.emit('repo page',{'owner':'" + doc.owner + "','repo':'" + doc.repo + "','head':'" + doc.head + "'});});");
+                        $(this).text("var doNotChangeURL=true;" + $(this).text());
                     }
                 });
                 res.send($.html());
@@ -100,49 +100,31 @@ io.on("connection", function(socket) {
                 var splitted = packet.url.split("/");
                 var owner = splitted[1];
                 var repo = splitted[2];
-                Page.findOne({
-                    "owner": owner,
-                    "repo": repo
-                }, function(err, page) {
-                    if (err) console.log(err);
-                    if (page) {
-                        socket.emit("repo page", {
+                request({
+                    url: "https://api.github.com/repos/" + owner + "/" + repo + "/git/refs/heads",
+                    headers: {
+                        "User-Agent": "CodeVisor"
+                    }
+                }, function(error, response, body) {
+                    if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
+                        socket.emit("head list", {
                             status: true,
-                            url: "p/" + page.owner + "/" + page.repo,
-                            contributors: page.contributors,
-                            commits: page.commits,
-                            tree: page.tree,
-                            styles: page.styles,
-                            head: page.head
+                            heads: JSON.parse(body),
+                            owner: owner,
+                            repo: repo
                         });
                     } else {
-                        request({
-                            url: "https://api.github.com/repos/" + owner + "/" + repo + "/git/refs/heads",
-                            headers: {
-                                "User-Agent": "CodeVisor"
-                            }
-                        }, function(error, response, body) {
-                            if (!error && (response.statusCode == 200 || response.statusCode == 403)) {
-                                socket.emit("head list", {
-                                    status: true,
-                                    heads: JSON.parse(body),
-                                    owner: owner,
-                                    repo: repo
-                                });
-                            } else {
-                                if (response.statusCode == 404) {
-                                    socket.emit("head list", {
-                                        status: false,
-                                        message: "Repository not found"
-                                    });
-                                } else {
-                                    socket.emit("head list", {
-                                        status: false,
-                                        message: "Unknown error"
-                                    });
-                                }
-                            }
-                        });
+                        if (response.statusCode == 404) {
+                            socket.emit("head list", {
+                                status: false,
+                                message: "Repository not found"
+                            });
+                        } else {
+                            socket.emit("head list", {
+                                status: false,
+                                message: "Unknown error"
+                            });
+                        }
                     }
                 });
             } else {
@@ -155,6 +137,7 @@ io.on("connection", function(socket) {
     });
 
     socket.on("repo page", function(packet) {
+        console.log(packet);
         var page;
         Page.findOne({
             "owner": packet.owner,
