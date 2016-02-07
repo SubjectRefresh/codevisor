@@ -122,12 +122,14 @@
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
                     for (selector in packet.styles) {
-                        decodedSelector = selector.replace("[dot]",".");
+                        decodedSelector = selector.replace("[dot]", ".");
                         $(decodedSelector).css(packet.styles[selector]);
                     }
                     var nodes = flatten(packet.tree)
                     var links = d3.layout.tree().links(nodes);
-
+                    var tooltip = d3.select("body").append("div")
+                        .attr("class", "tooltip card")
+                        .style("opacity", 0);
                     force
                         .nodes(nodes)
                         .links(links)
@@ -148,6 +150,24 @@
                         .attr("r", 5)
                         .style("fill", function(d) {
                             return color(d.color);
+                        })
+                        .on("mouseover", function(d) {
+                            tooltip.transition()
+                                .duration(100)
+                                .style("opacity", .8);
+                            tooltip.html(d.name)
+                                .style("left", d.x + "px")
+                                .style("top", d.y + "px");
+                        })
+                        .on("mouseout", function(d) {
+                            div.transition()
+                                .duration(0)
+                                .style("opacity", 0);
+                        })
+                        .on("mousedown", function(d) {
+                            div.transition()
+                                .duration(400)
+                                .style("opacity", 0);
                         })
                         .call(force.drag);
 

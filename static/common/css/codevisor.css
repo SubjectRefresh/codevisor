@@ -1,5 +1,5 @@
 /*
-	(c) 2015 Finnian Anderson. All rights reserved.
+    (c) 2015 Finnian Anderson. All rights reserved.
 */
 
 * {
@@ -8,7 +8,7 @@
 
 html,
 body {
-	background-color: black;
+    background-color: black;
     margin: 0;
     padding: 0;
 }
@@ -80,9 +80,9 @@ button {
 }
 
 button {
-	width: auto;
-	min-width: initial;
-	cursor: pointer;
+    width: auto;
+    min-width: initial;
+    cursor: pointer;
 }
 
 button:focus,
@@ -91,12 +91,12 @@ input:focus,
 input:hover,
 select:hover,
 select:focus {
-	outline-width: 0;
-	background-color: #fff;
+    outline-width: 0;
+    background-color: #fff;
 }
 
 .home button.submit {
-	margin-left: 20px;
+    margin-left: 20px;
 }
 
 .repo-page {
@@ -110,9 +110,9 @@ select:focus {
 
 .container {
     height: 100%;
-	width: 90%;
-	margin-left: auto;
-	margin-right: auto;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #video-pane,
@@ -153,43 +153,44 @@ select:focus {
 }
 
 span.contributor {
-	display: inline-block;
-	transition: all 0.2s linear;
+    display: inline-block;
+    transition: all 0.2s linear;
     -webkit-transform: scale(1, 1);
     -ms-transform: scale(1, 1);
     transform: scale(1, 1);
-	margin-right: 20px;
+    margin-right: 20px;
 }
 
 span.contributor:hover {
-	-webkit-transform: scale(1.1, 1.1);
+    -webkit-transform: scale(1.1, 1.1);
     -ms-transform: scale(1.1, 1.1);
     transform: scale(1.1, 1.1);
 }
 
 span.contributor:last-child {
-	margin-right: 0;
+    margin-right: 0;
 }
 
 span.contributor img {
-	border-radius: 100px;
-	max-width: 100px;
-	min-width: 50px;
+    border-radius: 100px;
+    max-width: 100px;
+    min-width: 50px;
 }
 
 .commit {
-	margin-top: 10px;
+    margin-top: 10px;
 }
 
 .commit > span {
-	display: block;
-	width: 100%;
-	text-align: center;
-	margin-right: 10px;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-right: 10px;
 }
+
 .author img {
-	max-width: 50px;
-	border-radius: 50px;
+    max-width: 50px;
+    border-radius: 50px;
 }
 
 line.link {
@@ -213,4 +214,16 @@ line.link {
     #contributors {
         margin-top: 20px;
     }
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 5px;
+    font: 8px;
+    color: #ffffff;
+    background: #2e2e2e;
+    border: 0px;
+    border-radius: 8px 8px 8px 0px;
+    pointer-events: none;
 }
