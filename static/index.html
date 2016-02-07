@@ -160,12 +160,12 @@
                                 .style("top", d.y + "px");
                         })
                         .on("mouseout", function(d) {
-                            div.transition()
+                            tooltip.transition()
                                 .duration(0)
                                 .style("opacity", 0);
                         })
                         .on("mousedown", function(d) {
-                            div.transition()
+                            tooltip.transition()
                                 .duration(400)
                                 .style("opacity", 0);
                         })

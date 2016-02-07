@@ -4,7 +4,7 @@
 
 var config = require("./config.js");
 var io, socket_end_point;
-var GitHubColors = require("github-colors");
+var extensions = require("./modules/extensions/index.js");
 var fs = require("fs");
 
 var express = require("express");
@@ -137,7 +137,6 @@ io.on("connection", function(socket) {
     });
 
     socket.on("repo page", function(packet) {
-        console.log(packet);
         var page;
         Page.findOne({
             "owner": packet.owner,
@@ -258,9 +257,10 @@ io.on("connection", function(socket) {
                                 var newChild = { // this is who we're gonna give birth to
                                     name: name
                                 };
-                                var color = name.split(".");
-                                color = GitHubColors.ext(color[color.length - 1]);
-                                newChild.color = color.color;
+                                var extension = name.split(".");
+                                extension = extension[extension.length-1];
+                                color = extensions.ext("."+extension);
+                                newChild.color = color;
                                 if (root[i].type == "tree") { // the file is a directory
                                     newChild.children = []; // our baby currently hasn't got any children
                                     var indexOfChild = hasChild(path[part], bookmark); // does this child already exist?

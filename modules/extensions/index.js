@@ -1,6 +1,8 @@
 var fs = require('fs');
 
-var colours = JSON.parse(fs.readFileSync('colours.json', 'utf8'));
+var colours = JSON.parse(fs.readFileSync(__dirname + '/colours.json', 'utf8'));
+
+var defaultColour = "#ececec";
 
 function ext(ext) {
 	// Turn extension to colour
@@ -13,7 +15,7 @@ function ext(ext) {
 					if (colours[keys[i]].color != undefined) {
 						return colours[keys[i]].color;
 					} else {
-						return null;
+						return defaultColour;
 					}
 				}
 			}
@@ -21,7 +23,7 @@ function ext(ext) {
 			// Nothing
 		}
 	}
-	return null;
+	return defaultColour;
 }
 
 function get(lang) {
@@ -47,9 +49,15 @@ function lang(ext) {
 	return null;
 }
 
+module.exports = {
+	ext: ext,
+	get: get,
+	lang: lang
+};
+
 console.log("== Testing ext() with '.agda' (Should Be #315665) ==");
-console.log(ext(".agda"));
+console.log(module.exports.ext(".agda"));
 console.log("== Testing get() with 'Agda' (Should Be #315665) ==");
-console.log(get("Agda"));
+console.log(module.exports.get("Agda"));
 console.log("== Testing lang() with '.agda' (Should Be Agda) ==");
-console.log(lang(".agda"));
+console.log(module.exports.lang(".agda"));
