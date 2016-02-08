@@ -54,7 +54,7 @@
                 $(this).removeClass("valid").removeClass("invalid");
             }
         });
-        $.getJSON("/get_config", function(config) {
+        $.getJSON("get_config", function(config) {
             socket = io(config.socket);
 
             // socket.emit("repo page", { // for development
