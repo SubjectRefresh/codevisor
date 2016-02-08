@@ -80,7 +80,8 @@ app.push("/hooks/*", function(req, res) {
         } else {
             console.log("No page for " + data.repository.full_name);
         }
-    }) res.json({
+    });
+    res.json({
         message: "Thanks GitHub, we've notified all the users!"
     });
 });
