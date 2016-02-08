@@ -55,9 +55,9 @@ module.exports = {
 	lang: lang
 };
 
-console.log("== Testing ext() with '.agda' (Should Be #315665) ==");
-console.log(module.exports.ext(".agda"));
-console.log("== Testing get() with 'Agda' (Should Be #315665) ==");
-console.log(module.exports.get("Agda"));
-console.log("== Testing lang() with '.agda' (Should Be Agda) ==");
-console.log(module.exports.lang(".agda"));
+// console.log("== Testing ext() with '.agda' (Should Be #315665) ==");
+// console.log(module.exports.ext(".agda"));
+// console.log("== Testing get() with 'Agda' (Should Be #315665) ==");
+// console.log(module.exports.get("Agda"));
+// console.log("== Testing lang() with '.agda' (Should Be Agda) ==");
+// console.log(module.exports.lang(".agda"));
