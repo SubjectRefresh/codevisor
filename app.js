@@ -39,7 +39,8 @@ var pageSchema = mongoose.Schema({
     styles: Object, // page styles
     tree: Object, // cache of tree 
     commits: Object, // cache of commits
-    contributors: Object // cache of contributors
+    contributors: Object, // cache of contributors
+    sockets: Array // currently connected sockets and their preferences
 });
 
 var Page = mongoose.model("page", pageSchema);
@@ -59,35 +60,85 @@ app.get("/get_config", function(req, res) {
     res.json(config);
 });
 
-app.get("/p/*", function(req, res) {
-    // what follows is probably really really bad code and uses practises frowned upon by the Node Gods
-    console.log("Repo page requested for " + req.params[0]);
-    var splitParam = req.params[0].split("/")
-    var owner = splitParam[0];
-    var repo = splitParam[1];
+app.push("/hooks/*", function(req, res) {
+    var data = req.body;
     Page.findOne({
-        "owner": owner,
-        "repo": repo
-    }, function(err, doc) {
+        owner: data.organization.login.toLowerCase(),
+        repo: data.repository.name.toLowerCase()
+    }, function(err, page) {
         if (err) console.log(err);
-        if (doc) {
-            fs.readFile(__dirname + '/static/index.html', 'utf8', function(err, html) {
-                // prevent the url rewriting that we use in the front end
-                $ = cheerio.load(html);
-                $("body").find("script").each(function(){
-                    if ($(this).data("name") == "main") {
-                        $(this).text("var doNotChangeURL=true;" + $(this).text());
-                    }
-                });
-                res.send($.html());
-            });
+
+        if (page) {
+            for (var i = 0; i < page.sockets.length; i++) {
+                console.log("Notifying socket " + page.sockets[i].id + " about a commit for " + data.repository.full_name);
+                io.to(page.sockets[i].id).emit('commits', data.commits); // if this fails, we need to remove this socket from page.sockets in the DB
+            }
+            if (page.sockets.length > 0) {
+                console.log("No connected sockets for " + data.repository.full_name);
+
+            }
         } else {
-            res.status(404).send('Sorry, that page could not be found!');
+            console.log("No page for " + data.repository.full_name);
         }
+    }) res.json({
+        message: "Thanks GitHub, we've notified all the users!"
     });
 });
 
+app.get("/p/*", function(req, res) {
+    res.redirect("/");
+    //     // what follows is probably really really bad code and uses practises frowned upon by the Node Gods
+    //     console.log("Repo page requested for " + req.params[0]);
+    //     var splitParam = req.params[0].split("/")
+    //     var owner = splitParam[0];
+    //     var repo = splitParam[1];
+    //     Page.findOne({
+    //         "owner": owner,
+    //         "repo": repo
+    //     }, function(err, doc) {
+    //         if (err) console.log(err);
+    //         if (doc) {
+    //             fs.readFile(__dirname + '/static/index.html', 'utf8', function(err, html) {
+    //                 // prevent the url rewriting that we use in the front end
+    //                 $ = cheerio.load(html);
+    //                 $("body").find("script").each(function() {
+    //                     if ($(this).data("name") == "main") {
+    //                         $(this).text("var doNotChangeURL=true;" + $(this).text());
+    //                     }
+    //                 });
+    //                 res.send($.html());
+    //             });
+    //         } else {
+    //             res.status(404).send('Sorry, that page could not be found!');
+    //         }
+    //     });
+});
+
 io.on("connection", function(socket) {
+    socket.on("disconnect", function() {
+        Page.findOne({
+            "sockets.id": socket.id
+        }, function(err, page) {
+            if (err) console.log(err);
+            if (page) {
+                console.log(page);
+                for (var i = 0; i < page.sockets.length; i++) {
+                    if (page.sockets[i].id == socket.id) {
+                        Page.update({
+                            _id: ObjectId(page._id)
+                        }, {
+                            $pull: {
+                                sockets: {
+                                    id: socket.id
+                                }
+                            }
+                        }); // in the future, this needs to work
+                        break;
+                    }
+                }
+            }
+        });
+    });
     socket.on("get heads", function(packet) {
         var urlRegExp = /^((ht|f)tps?:\/\/|)[a-z0-9-\.]+\.[a-z]{2,4}\/?([^\s<>\#%"\,\{\}\\|\\\^\[\]`]+)?$/;
 
@@ -144,6 +195,11 @@ io.on("connection", function(socket) {
         }, function(err, doc) {
             if (err) console.log(err);
             if (doc) {
+                doc.sockets.push({
+                    push: true,
+                    id: socket.id
+                });
+                doc.save();
                 page = doc;
                 socket.emit("repo page", {
                     status: true,
@@ -165,7 +221,11 @@ io.on("connection", function(socket) {
                     styles: config.defaultTheme,
                     tree: {},
                     commits: {},
-                    contributors: {}
+                    contributors: {},
+                    sockets: [{
+                        push: true,
+                        id: socket.id
+                    }]
                 });
 
                 function complete() {
@@ -258,8 +318,8 @@ io.on("connection", function(socket) {
                                     name: name
                                 };
                                 var extension = name.split(".");
-                                extension = extension[extension.length-1];
-                                color = extensions.ext("."+extension);
+                                extension = extension[extension.length - 1];
+                                color = extensions.ext("." + extension);
                                 newChild.color = color;
                                 if (root[i].type == "tree") { // the file is a directory
                                     newChild.children = []; // our baby currently hasn't got any children

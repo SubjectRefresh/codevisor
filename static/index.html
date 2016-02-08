@@ -199,6 +199,9 @@
                     });
                 }, 50);
             });
+            socket.on("commits", function(packet){
+                console.log(packet);
+            });
         });
     });
     var width = 960,
