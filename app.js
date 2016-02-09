@@ -62,6 +62,7 @@ app.get("/get_config", function(req, res) {
 
 app.post("/hooks", function(req, res) {
     var data = req.body;
+    var data = JSON.parse(req.body);
     Page.findOne({
         owner: data.organization.login.toLowerCase(),
         repo: data.repository.name.toLowerCase()
