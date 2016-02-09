@@ -39,8 +39,8 @@ var pageSchema = mongoose.Schema({
     owner: String, // owner of repository
     repo: String, // repository
     head: String, // branch
-    styles: Object, // page styles
-    tree: Object, // cache of tree 
+    theme: String, // page theme
+    tree: Object, // cache of tree
     commits: Object, // cache of commits
     contributors: Object, // cache of contributors
     sockets: Array // currently connected sockets and their preferences
@@ -211,7 +211,7 @@ io.on("connection", function(socket) {
                     contributors: page.contributors,
                     commits: page.commits,
                     tree: page.tree,
-                    styles: page.styles,
+                    theme: page.theme,
                     head: page.head
                 });
             } else {
@@ -222,7 +222,7 @@ io.on("connection", function(socket) {
                     owner: packet.owner,
                     repo: packet.repo,
                     head: packet.head,
-                    styles: config.defaultTheme,
+                    theme: config.defaultTheme,
                     tree: {},
                     commits: {},
                     contributors: {},
@@ -243,7 +243,7 @@ io.on("connection", function(socket) {
                             contributors: page.contributors,
                             commits: page.commits,
                             tree: page.tree,
-                            styles: page.styles
+                            theme: page.theme
                         });
                     }
                 }
