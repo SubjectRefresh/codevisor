@@ -124,7 +124,7 @@
                     for (var i = 0; i < packet.commits.length; i++) {
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
-                    var nodes = flatten(packet.tree)
+                    var nodes = flatten(packet.tree);
                     var links = d3.layout.tree().links(nodes);
                     var tooltip = d3.select("body").append("div")
                         .attr("class", "tooltip card")
