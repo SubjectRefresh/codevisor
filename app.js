@@ -76,7 +76,7 @@ app.post("/hooks", function(req, res) {
                 console.log("Notifying socket " + page.sockets[i].id + " about a commit for " + data.repository.full_name);
                 io.to(page.sockets[i].id).emit('commits', data.commits); // if this fails, we need to remove this socket from page.sockets in the DB
             }
-            if (page.sockets.length > 0) {
+            if (page.sockets.length < 1) {
                 console.log("No connected sockets for " + data.repository.full_name);
 
             }
