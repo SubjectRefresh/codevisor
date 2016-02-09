@@ -13,6 +13,9 @@ var http = require("http").Server(app);
 var sha1 = require("sha1");
 var request = require("request");
 var cheerio = require('cheerio');
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 if (config.production) {
     io = require("socket.io")(http, {
@@ -62,7 +65,6 @@ app.get("/get_config", function(req, res) {
 
 app.post("/hooks", function(req, res) {
     var data = req.body;
-    var data = JSON.parse(req.body);
     Page.findOne({
         owner: data.organization.login.toLowerCase(),
         repo: data.repository.name.toLowerCase()
