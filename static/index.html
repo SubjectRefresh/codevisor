@@ -7,6 +7,7 @@
 <head>
     <title>CodeVisor</title>
     <link rel="stylesheet" type="text/css" href="common/css/codevisor.css">
+    <link id="theme" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -107,12 +108,14 @@
                     alert("Error: " + packet.message);
                 }
             });
+            var doNotChangeURL = true;
             socket.on("repo page", function(packet) {
                 console.log(packet);
                 if (typeof doNotChangeURL === 'undefined') history.pushState('data', '', packet.url);
                 $(".video").addClass("scale-5-5");
                 $(".home").addClass("scale-5-5");
                 $("body").css("background-color", "#212121");
+                $("#theme").attr("href", "common/css/themes/" + packet.theme + ".css");
                 setTimeout(function() {
                     $(".repo-page").addClass("slide-down").show();
                     for (var i = 0; i < packet.contributors.length; i++) {
@@ -120,10 +123,6 @@
                     }
                     for (var i = 0; i < packet.commits.length; i++) {
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
-                    }
-                    for (selector in packet.styles) {
-                        decodedSelector = selector.replace("[dot]", ".");
-                        $(decodedSelector).css(packet.styles[selector]);
                     }
                     var nodes = flatten(packet.tree)
                     var links = d3.layout.tree().links(nodes);
