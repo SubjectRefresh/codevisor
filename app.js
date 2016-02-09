@@ -60,7 +60,7 @@ app.get("/get_config", function(req, res) {
     res.json(config);
 });
 
-app.post("/hooks/*", function(req, res) {
+app.post("/hooks", function(req, res) {
     var data = req.body;
     Page.findOne({
         owner: data.organization.login.toLowerCase(),
