@@ -143,6 +143,7 @@ io.on("connection", function(socket) {
         });
     });
     socket.on("get heads", function(packet) {
+        packet.url.replace("http://", "").replace("https://","");
         var urlRegExp = /^((ht|f)tps?:\/\/|)[a-z0-9-\.]+\.[a-z]{2,4}\/?([^\s<>\#%"\,\{\}\\|\\\^\[\]`]+)?$/;
 
         if (!packet.url || urlRegExp.test(packet.url.match)) {
