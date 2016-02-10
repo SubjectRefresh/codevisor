@@ -125,7 +125,6 @@ io.on("connection", function(socket) {
         }, function(err, page) {
             if (err) console.log(err);
             if (page) {
-                console.log(page);
                 for (var i = 0; i < page.sockets.length; i++) {
                     if (page.sockets[i].id == socket.id) {
                         Page.update({
