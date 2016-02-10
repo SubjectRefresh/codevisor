@@ -258,23 +258,25 @@ io.on("connection", function(socket) {
                         var commits2 = [];
                         for (var i = 0; i < commits.length; i++) {
                             var duplicate = false;
-                            for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
-                                if (contributors[i2].id == commits[i].author.id) {
-                                    duplicate = true;
-                                    break;
+                            if (commits[i].author !== null){ // this happens if someone didn't set up their SSH key to use their GitHub email
+                                for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
+                                    if (contributors[i2].id == commits[i].author.id) {
+                                        duplicate = true;
+                                        break;
+                                    }
                                 }
+                                if (!duplicate) { // we didn't find a duplicate contributor
+                                    contributors.push({
+                                        id: commits[i].author.id,
+                                        name: commits[i].commit.author.name,
+                                        icon: commits[i].author.avatar_url,
+                                        url: commits[i].author.html_url
+                                    });
+                                }
+                                delete commits[i].commit.committer;
+                                commits[i].commit.author.icon = commits[i].author.avatar_url;
+                                commits2.push(commits[i].commit);
                             }
-                            if (!duplicate) { // we didn't find a duplicate contributor
-                                contributors.push({
-                                    id: commits[i].author.id,
-                                    name: commits[i].commit.author.name,
-                                    icon: commits[i].author.avatar_url,
-                                    url: commits[i].author.html_url
-                                });
-                            }
-                            delete commits[i].commit.committer;
-                            commits[i].commit.author.icon = commits[i].author.avatar_url;
-                            commits2.push(commits[i].commit);
                         }
                         page.commits = commits2;
                         page.contributors = contributors;
