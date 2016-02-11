@@ -30,6 +30,7 @@
             <div id="contributors"></div>
         </div>
     </div>
+    <script async src="common/js/notification/notification.min.js"></script>
     <script src="common/js/jquery.js"></script>
     <script src="common/js/socket.io.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -37,6 +38,9 @@
     var urlRegExp = /^((ht|f)tps?:\/\/|)[a-z0-9-\.]+\.[a-z]{2,4}\/?([^\s<>\#%"\,\{\}\\|\\\^\[\]`]+)?$/;
     var socket;
     $(function() {
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
         $("#url").keyup(function(e) {
             if (e.keyCode == 13) {
                 socket.emit("get heads", {
@@ -198,8 +202,25 @@
                     });
                 }, 50);
             });
-            socket.on("commits", function(packet){
-                console.log(packet);
+            socket.on("commits", function(packet) {
+                var authors = [];
+                if (packet.commits.length > 1) {
+                    var title = "New commits";
+                    var suffix = "commits";
+                } else {
+                    var title = "New commit";
+                    var suffix = "commit";
+                }
+                for (var i = 0; i < packet.commits.length; i++){
+                    authors.push(packet.commits[i].committer.name);
+                }
+                var body = authors.join(", ") + " pushed " + packet.commits.length + " " + suffix + " to " + packet.repository.full_name;
+                n = new Notification(title, {
+                    body: body,
+                    icon: "common/img/codevisor.img"
+                });
+                // code to update force graph goes here.
+                // packet.commits is the array of commits
             });
         });
     });
