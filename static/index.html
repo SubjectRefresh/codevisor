@@ -207,21 +207,41 @@
             });
             socket.on("commits", function(packet) {
                 var authors = [];
+                var title = packet.commits.length + " new commit";
+                var suffix = " commit";
+
                 if (packet.commits.length > 1) {
-                    var title = "New commits";
-                    var suffix = "commits";
-                } else {
-                    var title = "New commit";
-                    var suffix = "commit";
+                    title += "s";
+                    suffix += "s";
                 }
-                for (var i = 0; i < packet.commits.length; i++){
-                    authors.push(packet.commits[i].committer.name);
+                title += " for " + packet.repository.full_name;
+
+                for (var i = 0; i < packet.commits.length; i++) {
+                    var duplicate = false;
+                    for (var i2 = 0; i2 < authors.length; i2++) {
+                        if (authors[i2].username == packet.commits[i].committer.username) {
+                            duplicate = true;
+                            break;
+                        }
+                    }
+                    if (!duplicate) { // we didn't find a duplicate contributor
+                        authors.push(packet.commits[i].committer);
+                    }
                 }
-                var body = authors.join(", ") + " pushed " + packet.commits.length + " " + suffix + " to " + packet.repository.full_name;
+                var body = "";
+                for (var i = 0; i < authors.length; i++) {
+                    var delimiter = ", ";
+                    if (i == authors.length - 2) delimiter = " & ";
+                    if (i == authors.length - 1) delimiter = "";
+                    body += authors[i].name + delimiter;
+                }
+                body += " pushed " + packet.commits.length + suffix;
                 n = new Notification(title, {
                     body: body,
                     icon: "common/img/codevisor.img"
                 });
+
+
                 // code to update force graph goes here.
                 // packet.commits is the array of commits
             });
