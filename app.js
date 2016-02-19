@@ -15,7 +15,9 @@ var request = require("request");
 var cheerio = require('cheerio');
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(bodyParser.urlencoded({
+    extended: true
+})); // support encoded bodies
 
 if (config.production) {
     io = require("socket.io")(http, {
@@ -142,8 +144,14 @@ io.on("connection", function(socket) {
             }
         });
     });
+    socket.on("extension colour", function(packet, fn) {
+        var extension = packet.extension.split(".");
+        extension = extension[extension.length - 1];
+        colour = extensions.ext("." + extension);
+        fn(colour);
+    });
     socket.on("get heads", function(packet) {
-        packet.url.replace("http://", "").replace("https://","");
+        packet.url.replace("http://", "").replace("https://", "");
         var urlRegExp = /^((ht|f)tps?:\/\/|)[a-z0-9-\.]+\.[a-z]{2,4}\/?([^\s<>\#%"\,\{\}\\|\\\^\[\]`]+)?$/;
 
         if (!packet.url || urlRegExp.test(packet.url.match)) {
@@ -259,7 +267,7 @@ io.on("connection", function(socket) {
                         var commits2 = [];
                         for (var i = 0; i < commits.length; i++) {
                             var duplicate = false;
-                            if (commits[i].author !== null){ // this happens if someone didn't set up their SSH key to use their GitHub email
+                            if (commits[i].author !== null) { // this happens if someone didn't set up their SSH key to use their GitHub email
                                 for (var i2 = 0; i2 < contributors.length; i2++) { // check we don't have a duplicate contributor
                                     if (contributors[i2].id == commits[i].author.id) {
                                         duplicate = true;
@@ -299,7 +307,8 @@ io.on("connection", function(socket) {
 
                         var directory = {
                             name: "/",
-                            children: []
+                            children: [],
+                            path: "/"
                         };
 
                         function hasChild(name, root) {
@@ -321,7 +330,8 @@ io.on("connection", function(socket) {
                             var name = path[path.length - 1];
                             for (var part = 0; part < path.length; part++) { // loop through every part of the path
                                 var newChild = { // this is who we're gonna give birth to
-                                    name: name
+                                    name: name,
+                                    path: path.join("/")
                                 };
                                 var extension = name.split(".");
                                 extension = extension[extension.length - 1];
@@ -335,7 +345,8 @@ io.on("connection", function(socket) {
                                     } else { // we need to give birth to it
                                         var newChildIndex = bookmark.children.push({
                                             name: path[part],
-                                            children: []
+                                            children: [],
+                                            path: path.join("/")
                                         }); // give birth to it!
                                         bookmark = bookmark.children[newChildIndex - 1]; // set the bookmark to be the new child
                                     }

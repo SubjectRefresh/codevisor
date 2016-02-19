@@ -40,6 +40,8 @@
     var nodes;
     var links;
     var tooltip;
+    var link, node;
+    var tree = d3.layout.tree();
     $(function() {
         if (Notification.permission !== 'granted') {
             Notification.requestPermission();
@@ -132,7 +134,7 @@
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
                     nodes = flatten(packet.tree);
-                    links = d3.layout.tree().links(nodes);
+                    links = tree.links(nodes);
                     tooltip = d3.select("body").append("div")
                         .attr("class", "tooltip card")
                         .style("opacity", 0);
@@ -141,7 +143,7 @@
                         .links(links)
                         .start();
 
-                    var link = svg.selectAll(".link")
+                    link = svg.selectAll(".link")
                         .data(links)
                         .enter().append("line")
                         .attr("class", "link")
@@ -149,7 +151,7 @@
                             return Math.sqrt(d.value);
                         });
 
-                    var node = svg.selectAll(".node")
+                    node = svg.selectAll(".node")
                         .data(nodes)
                         .enter().append("circle")
                         .attr("class", "node")
@@ -206,6 +208,9 @@
                 }, 50);
             });
             socket.on("commits", function(packet) {
+                node = svg.selectAll(".node");
+                link = svg.selectAll(".link");
+
                 var authors = [];
                 var title = packet.commits.length + " new commit";
                 var suffix = " commit";
@@ -216,17 +221,146 @@
                 }
                 title += " for " + packet.repository.full_name;
 
-                for (var i = 0; i < packet.commits.length; i++) {
-                    var duplicate = false;
-                    for (var i2 = 0; i2 < authors.length; i2++) {
-                        if (authors[i2].username == packet.commits[i].committer.username) {
-                            duplicate = true;
-                            break;
+                function decend(bookmark, path) {
+                    path = path.split("/");
+                    if (path.length > 1) path.pop(); // remove file so we only find where it should go
+                    for (var part = 0; part < path.length; part++) {
+                        for (var dir = 0; dir < nodes.length; dir++) {
+                            if (nodes[dir].name == path[part]) {
+                                bookmark = nodes[dir];
+                            }
                         }
                     }
-                    if (!duplicate) { // we didn't find a duplicate contributor
-                        authors.push(packet.commits[i].committer);
+                    return bookmark;
+                }
+
+                for (var commit = 0; commit < packet.commits.length; commit++) {
+                    if (packet.commits[commit].added) {
+                        console.log("Added: " + packet.commits[commit].added.join(", "));
+                        for (var i = 0; i < packet.commits[commit].added.length; i++) {
+                            var path = packet.commits[commit].added[i];
+                            var name = path.split("/");
+                            name = name[name.length - 1];
+                            var bookmark = decend(nodes, path);
+                            console.log(bookmark);
+                            var extension = path.split(".");
+                            extension = extension[extension.length - 1]; // get last item of the .split()
+                            socket.emit("extension colour", {
+                                extension: extension
+                            }, function(colour) {
+                                var newNode = {
+                                    name: name,
+                                    id: path.replace(".", "-dot-"),
+                                    color: colour,
+                                    path: path
+                                };
+                                nodes.push(newNode);
+                                links.push({
+                                    source: bookmark,
+                                    target: newNode
+                                });
+                                start();
+                                svg.selectAll(".node").attr("r", function(d) {
+                                        if (d.id == path) {
+                                            return 5;
+                                        } else {
+                                            return 5; // find way of returning current radius to prevent resets
+                                        }
+                                    })
+                                    .style("fill", function(d) {
+                                        return color(d.color);
+                                    })
+                                    .on("mouseover", function(d) {
+                                        tooltip.transition()
+                                            .duration(100)
+                                            .style("opacity", .8);
+                                        tooltip.html(d.name)
+                                            .style("left", d.x + "px")
+                                            .style("top", d.y + "px");
+                                    })
+                                    .on("mouseout", function(d) {
+                                        tooltip.transition()
+                                            .duration(0)
+                                            .style("opacity", 0);
+                                    })
+                                    .on("mousedown", function(d) {
+                                        tooltip.transition()
+                                            .duration(400)
+                                            .style("opacity", 0);
+                                    })
+                                    .call(force.drag);
+                            });
+                        }
                     }
+                    if (packet.commits[commit].modified) {
+                        for (var i = 0; i < packet.commits[commit].modified.length; i++) {
+                            var bookmark = decend(nodes, packet.commits[commit].modified[i]);
+                            var name = packet.commits[commit].modified[i].split("/");
+                            name = name[name.length - 1];
+                            svg.selectAll(".node").each(function(d) { // ripple the ones that have been modified
+                                if (d.path == packet.commits[commit].modified[i]) {
+                                    d3.select(this).transition()
+                                        .duration(250)
+                                        .attr('r', function(item) {
+                                            return 2 * d3.select(this).attr("r");
+                                        })
+                                        .ease('quad-in')
+                                        .transition()
+                                        .delay(250)
+                                        .duration(250)
+                                        .attr('r', function(item) {
+                                            return d3.select(this).attr("r");
+                                        })
+                                        .ease('quad-in');
+                                }
+                            });
+                        }
+                    }
+                    if (packet.commits[commit].removed) { // we have some to remove
+                        console.log("Removed: " + packet.commits[commit].removed.join(", "));
+                        for (var i = 0; i < packet.commits[commit].removed.length; i++) { // loop through removed files
+                            var name = packet.commits[commit].removed[i].split("/");
+                            name = name[name.length - 1];
+                            svg.selectAll(".node").each(function(d) {
+                                if (d.path == packet.commits[commit].removed[i]) {
+                                    d3.select(this).each(function(item) { // select the node to be removed - TODO: remove directories properly
+                                        d3.select(this)
+                                            .transition()
+                                            .duration(250)
+                                            .attr('r', function(item) {
+                                                return 0;
+                                            })
+                                            .ease('quad-in')
+                                            .delay(250)
+                                            .remove();
+                                    });
+                                    svg.selectAll(".link").each(function(link){ // remove all links relating to what we need to remove
+                                        if (link.target == d || link.source == d) {
+                                            d3.select(this)
+                                                .transition()
+                                                .duration(250)
+                                                .attr('stroke-opacity', function(item) {
+                                                    return 0;
+                                                })
+                                                .ease('quad-in')
+                                                .delay(250)
+                                                .remove();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+                var duplicate = false;
+                for (var i2 = 0; i2 < authors.length; i2++) {
+                    if (authors[i2].username == packet.commits[i].committer.username) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (!duplicate) { // we didn't find a duplicate contributor
+                    authors.push(packet.commits[i].committer);
                 }
                 var body = "";
                 for (var i = 0; i < authors.length; i++) {
@@ -240,13 +374,28 @@
                     body: body,
                     icon: "common/img/codevisor.img"
                 });
-
-
-                // code to update force graph goes here.
-                // packet.commits is the array of commits
             });
+
         });
     });
+
+    function start() {
+        link = link.data(force.links(), function(d) {
+            return d.source.id + "-" + d.target.id;
+        });
+        link.enter().insert("line", ".node").attr("class", "link");
+        link.exit().remove();
+
+        node = node.data(force.nodes(), function(d) {
+            return d.id;
+        });
+        node.enter().append("circle").attr("class", function(d) {
+            return "node " + d.id;
+        }).attr("r", 8);
+        node.exit().remove();
+
+        force.start();
+    }
     var width = 960,
         height = 500;
 
