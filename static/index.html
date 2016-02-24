@@ -128,7 +128,7 @@
                 setTimeout(function() {
                     $(".repo-page").addClass("slide-down").show();
                     for (var i = 0; i < packet.contributors.length; i++) {
-                        $("<span class='contributor'><a href='" + packet.contributors[i].url + "'><img src='" + packet.contributors[i].icon + "'></a></span>").appendTo($("#contributors"));
+                        $("<span class='contributor'><a href='" + packet.contributors[i].url + "' target='_blank'><img src='" + packet.contributors[i].icon + "'></a></span>").appendTo($("#contributors"));
                     }
                     for (var i = 0; i < packet.commits.length; i++) {
                         $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
