@@ -13,7 +13,7 @@
 <body>
     <div class="video" style="">
         <video muted autoplay loop>
-            <source src="common/img/example.mp4" type="video/mp4"> Your browser does not support the video tag.
+            <!-- <source src="common/img/example.mp4" type="video/mp4"> Your browser does not support the video tag. -->
         </video>
     </div>
     <div class="home" style="">
@@ -396,8 +396,10 @@
 
         force.start();
     }
-    var width = 960,
-        height = 500;
+
+    var width = $("#video-pane").width(),
+        height = $("#video-pane").height();
+    console.log(width, height);
 
     var color = d3.scale.category20();
 
