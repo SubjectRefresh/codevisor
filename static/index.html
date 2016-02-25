@@ -364,9 +364,6 @@
                         authors.push(packet.commits[commit].committer);
                     }
                 }
-                if (!duplicate) { // we didn't find a duplicate contributor
-                    authors.push(packet.commits[commit].committer);
-                }
                 var body = "";
                 for (var i = 0; i < authors.length; i++) {
                     var delimiter = ", ";
