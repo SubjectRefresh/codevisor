@@ -98,20 +98,23 @@ select {
 
 .container {
   height: 100%;
-  width: 90%;
+  width: 100%;
   margin-left: auto;
   margin-right: auto; }
+
+::-webkit-scrollbar {
+  display: none; }
 
 #video-pane,
 #sidebar,
 #contributors {
-  margin-top: 20px;
   background: #b14aed;
   height: auto;
   display: inline-block; }
 
 #contributors {
-  text-align: center; }
+  text-align: center;
+  margin-top: 20px; }
 
 #video-pane,
 #contributors {
@@ -124,9 +127,8 @@ select {
   overflow-y: auto;
   overflow-x: hidden;
   width: 20%;
-  height: calc(100% - 40px);
-  float: right;
-  margin-bottom: 20px; }
+  height: 100%;
+  float: right; }
 
 .scale-5-5 {
   -webkit-transform: scale(0.5, 0.5);
@@ -190,19 +192,18 @@ line.link {
   stroke: #ececec; }
 
 @media only screen and (max-width: 900px) {
-  #video-pane,
-  #sidebar {
-    width: 100%; }
-
   #video-pane {
+    width: 100%;
     height: 80%; }
+
+  #sidebar,
+  #contributors {
+    width: 45%;
+    margin-bottom: 20px; }
 
   #sidebar {
     min-height: 200px;
-    width: 45%; }
-
-  #contributors {
-    width: 45%; } }
+    margin-top: 20px; } }
 div.tooltip {
   position: absolute;
   text-align: center;
