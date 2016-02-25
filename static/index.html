@@ -355,13 +355,13 @@
                 }
                 var duplicate = false;
                 for (var i2 = 0; i2 < authors.length; i2++) {
-                    if (authors[i2].username == packet.commits[i].committer.username) {
+                    if (authors[i2].username == packet.commits[commit].committer.username) {
                         duplicate = true;
                         break;
                     }
                 }
                 if (!duplicate) { // we didn't find a duplicate contributor
-                    authors.push(packet.commits[i].committer);
+                    authors.push(packet.commits[commit].committer);
                 }
                 var body = "";
                 for (var i = 0; i < authors.length; i++) {
