@@ -293,6 +293,7 @@
                         }
                     }
                     if (packet.commits[commit].modified) {
+                        console.log("Added: " + packet.commits[commit].modified.join(", "));
                         for (var i = 0; i < packet.commits[commit].modified.length; i++) {
                             var bookmark = decend(nodes, packet.commits[commit].modified[i]);
                             var name = packet.commits[commit].modified[i].split("/");
@@ -399,7 +400,6 @@
 
     var width = $("#video-pane").width(),
         height = $("#video-pane").height();
-    console.log(width, height);
 
     var color = d3.scale.category20();
 
