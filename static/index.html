@@ -131,7 +131,7 @@
                         $("<span class='contributor'><a href='" + packet.contributors[i].url + "' target='_blank'><img src='" + packet.contributors[i].icon + "'></a></span>").appendTo($("#contributors"));
                     }
                     for (var i = 0; i < packet.commits.length; i++) {
-                        $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
+                        $("<div class='commit'><span class='author'><img src='" + packet.commits[i].author.icon + "'></span><span class='message'>" + packet.commits[i].message.split("\n\n")[0] + "</span><span class='when'>" + packet.commits[i].author.date + "</span></div>").appendTo($("#sidebar"));
                     }
                     nodes = flatten(packet.tree);
                     links = tree.links(nodes);
@@ -363,6 +363,13 @@
                     if (!duplicate) { // we didn't find a duplicate contributor
                         authors.push(packet.commits[commit].committer);
                     }
+
+                    var $commit = $("<div class='commit'></div>");
+                    $commit.append("<span class='author'><img src='"+packet.sender.avatar_url+"'></span>");
+                    $commit.append("<span class='message'>"+packet.commits[commit].message.split("\n\n")[0]+"</span>");
+                    $commit.append("<span class='when'>"+packet.commits[commit].timestamp+"</span>");
+
+                    $commit.prependTo("#sidebar").hide().slideDown("slow");
                 }
                 var body = "";
                 for (var i = 0; i < authors.length; i++) {
